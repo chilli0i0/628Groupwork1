@@ -17,7 +17,7 @@ library(boot)
 ```
 
 
-首先我们读入数据：
+Read the data:
 ```{r}
 data.raw <- read.csv(file = "../../Data/BodyFat.csv")
 #remove IDNO, which is useless. we keep density for data redundancy
@@ -25,14 +25,14 @@ data.raw <- data.raw[, -1]
 ```
 
 
-用str函数可以查看data各列的数据类型
+Summarize the data using `str` and `summary`:
 ```{r}
 str(data.raw)
 summary(data.raw)
 ```
-可以看到除了年龄为整数型随机变量外，其他变量都为浮点型。 没有明显的因子型随机变量。
+It could be observed that all variables except `age`, which is an integer variable, are floating variables. There are no obvious factorial variables.
 
-我们可以先画出因变量对各个自变量的散点图进行探索性分析：
+We begin our analysis with drawing scatterplots of our dependent variable `BODYFAT` against all other variables.
 ```{r}
 par(mfrow = c(2,2))
 name = colnames(data.raw)
@@ -50,13 +50,16 @@ for(i in 1:16){
 index = unique(index)
 data.raw[index,]
 
-#recalculate bodyfat using density
+#recalculate bodyfat using density since there are a few outlying points on the plot 
 lm(data.raw[,"BODYFAT"]~ data.raw[,"DENSITY"])
-plot(mod$fitted.values, data.raw[,"DENSITY"])
+
+plot(mod$fitted.values, data.raw[,"DENSITY"], type = "l")
 points(data.raw[,"BODYFAT"],data.raw[,"DENSITY"], col = "red")
 
 #but it will give us a strange range
 range(mod$fitted.values)
+
+#therefore, I guess we need to clean away the 
 
 ```
 从各散点图中可以看出BODYFAT与多个自变量有着近似线性关系，所以可以首先尝试建立线性模型。某些自变量对BODYFAT的散点图近似有相同趋势提示我们在建立线性模型中可能存在多重共线性的问题。同时散点图中一些点与其他点偏离较大提示数据中可能存在异常点。另外，注意到年龄这一整数型变量与BODYFAT也有着近似线性的趋势，提示我们可以不把年龄变量作为因子型变量。
