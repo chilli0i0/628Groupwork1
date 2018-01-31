@@ -5,10 +5,19 @@ output:
 ---
 要安装gvlma包，car包，glmnet包，psych包, pls包，boot包
 
+```{r, echo=FALSE}
+library(gvlma)
+library(car)
+library(glmnet)
+library(psych)
+library(pls)
+library(boot)
+```
+
 
 首先我们读入数据：
 ```{r}
-data.raw <- read.csv(file = "/Users/andreolli/Desktop/BodyFat.csv")
+data.raw <- read.csv(file = "../Data/BodyFat.csv")
 data.raw <- data.raw[, -c(1,3)]
 ```
 
