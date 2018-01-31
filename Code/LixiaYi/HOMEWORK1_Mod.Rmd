@@ -3,7 +3,9 @@ output:
   word_document: default
   html_document: default
 ---
-要安装gvlma包，car包，glmnet包，psych包, pls包，boot包
+##Translating (partly) and working based on LiuHongzhi's work.
+
+Packages "gvlma", "car", "glmnet", "psych", "pls" and "boot" are needed
 
 ```{r, echo=FALSE}
 library(gvlma)
@@ -26,6 +28,7 @@ data.raw <- data.raw[, -1]
 用str函数可以查看data各列的数据类型
 ```{r}
 str(data.raw)
+summary(data.raw)
 ```
 可以看到除了年龄为整数型随机变量外，其他变量都为浮点型。 没有明显的因子型随机变量。
 
@@ -38,10 +41,23 @@ for(i in 1:15)
   plot(x = data.raw[,i + 1], y = data.raw[,1], xlab = name[i+1], ylab = name[1])
 }
 
-#is adiposity BMI or BAI?
-plot(x = data.raw[,"ADIPOSITY"], y = data.raw[,"HIP"])
-plot(x = data.raw[,"ADIPOSITY"], y = data.raw[,"HEIGHT"])
-plot(x = data.raw[,"ADIPOSITY"], y = data.raw[,"WEIGHT"])
+index = NULL
+for(i in 1:16){
+  index = c(index,which(max(data.raw[,i]) == data.raw[,i]))
+   cat("index of the max value in", name[i], which(max(data.raw[,i]) == data.raw[,i]), "\n")
+}
+
+index = unique(index)
+data.raw[index,]
+
+#recalculate bodyfat using density
+lm(data.raw[,"BODYFAT"]~ data.raw[,"DENSITY"])
+plot(mod$fitted.values, data.raw[,"DENSITY"])
+points(data.raw[,"BODYFAT"],data.raw[,"DENSITY"], col = "red")
+
+#but it will give us a strange range
+range(mod$fitted.values)
+
 ```
 从各散点图中可以看出BODYFAT与多个自变量有着近似线性关系，所以可以首先尝试建立线性模型。某些自变量对BODYFAT的散点图近似有相同趋势提示我们在建立线性模型中可能存在多重共线性的问题。同时散点图中一些点与其他点偏离较大提示数据中可能存在异常点。另外，注意到年龄这一整数型变量与BODYFAT也有着近似线性的趋势，提示我们可以不把年龄变量作为因子型变量。
 
