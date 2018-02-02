@@ -23,7 +23,7 @@ unusual points checking rules:
 
 We try to delete (1),(2) abnormal points at the begining and other after fitting a multi-linear regression
 ```{r}
-data <- read.csv(file = "../Data/BodyFat.csv")
+data <- read.csv(file = "Data/BodyFat.csv")
 data <- data[, -c(1)]
 str(data)
 summary(data$BODYFAT)
@@ -35,7 +35,7 @@ which(data$BODYFAT==max(data$BODYFAT))
 
 use density to estimate bodyfat and compare with the observed bodyfat point 96 is likely to be an abnormal point
 ```{r}
-err = (495/data$DENSITY-450-data$BODYFAT) #siri's formula
+err = (495/data$DENSITY-450-data$BODYFAT)
 which(err==min(err))
 ```
 
@@ -61,7 +61,7 @@ data.1=data[-c(182,216,96,42),-c(2)]
 ```
 
 ###2.Visualization
-Most x's have a positive trend with y. And the multilinearity is heavy in this data set. Age here has a negative trend with height, may because of age range in this data set.
+Most x has positive trend with y. And the multilinearity is heavy in this data set. Age here has a negetive trend with height, may because of age range in this data set.
 ```{r}
 library('corrplot')
 library("RColorBrewer")
@@ -98,31 +98,27 @@ summary(model.raw)
 par(mfrow = c(2,2))
 plot(model.raw)
 require(car)
-v = vif(model.raw)
+v = sort(vif(model.raw),decreasing = TRUE)
 library(gridExtra)
 library(grid)
-r1 = names(v)[1:7]
-r2 = round(v[1:7],2)
-r3 = names(v)[8:14]
-r4 = round(v[8:14],2)
+r1 = names(v)[1:7];r2 = round(v[1:7],2)
+r3 = names(v)[8:14];r4 = round(v[8:14],2)
 r = rbind(r1,r2,r3,r4);colnames(r) = NULL;rownames(r) = NULL
 table <- tableGrob(r)
 grid.newpage()
 h <- grobHeight(table)
 w <- grobWidth(table)
 title <- textGrob("VIF for full model", y=unit(0.5,"npc") + 1*h, 
-                  vjust=0, gp=gpar(fontsize=20))
+                  vjust=0, gp=gpar(fontsize=15))
 gt <- gTree(children=gList(table, title))
 grid.draw(gt)
-v = data.frame(VIF=round(v,2))
 
-grid.table(r,main="VIF")
 par(mfrow = c(1,1))
 plot(model.raw, which=4)
 abline( h = 4/(248-15),lty=2 )
 ```
 
-remove abnormal points and high influential points from the data
+remove abnormal points and high influencial points from the data
 
 #(1)remove high influencial point 39,86,221
 
@@ -138,21 +134,19 @@ hat.plot <- function(fit){
 ```
 
 
-rule: cook's distance>4/(n-p), one each time(stop at point 86)
+rule:cook's distance>4/(n-p), one each time(stop at point 86)
 
-rule: no extreme values on other independent variables: 31,41,79
+rule:no extreme values on other independent variables: 31,41,79
 ```{r}
-data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163),-2]
+data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163),-2]   #points differ
 model.raw2 <- lm(BODYFAT ~ ., data = data.2)
-plot(model.raw2, which=4)
-abline( h = 4/(241-15),lty=2 )
-model.raw2 <- lm(BODYFAT ~ ., data = data.2)
+outlierTest(model.raw2)
+data[224,]  #suspected outlier, but do not delete at 5%
 hat.plot(model.raw2)
 data.3 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163, 31, 36, 54, 175, 106, 159, 206),-2]
-
 ```
 
-Now, we use cleaned data to refit the multivariate linear regression model and we find that the adjusted R-square is 0.71, which is high enough. Furthermore, we can inspect the diagnostic plots. There is not any obvious outlier. From the plot we can guess that except for the normality assumption, no assumption of linear regression model is violated.
+Now, we use cleaned data to refit the mutivariate linear regression model, and we find that the asjusted R-square is 0.71 which is high enough. And, we can see the diagnostic plots. There is not any obvious outlier. And, from the plot we can guess that except for the normality assumption, no assumption of linear regression model is violeted.
 ```{r}
 model.full <- lm(BODYFAT ~ ., data = data.3)
 summary(model.full)
@@ -160,13 +154,13 @@ par(mfrow = c(2,2))
 plot(model.full)
 ```
 
-#(2)suspected outlier point: 224(do not delete)
+#(2)suspected outlier point:224(do not delete)
 ```{r}
 outlierTest(model.raw2)
 ```
 
 ###4. checking assumptions of the multi-linear model
-(1)check for independence: Durbin-Watson test has a p-value>0.05, satisfy
+(1)check for independence:Durbin-Watson test has a p-value>0.05, satisfy
 
 (2)check for homescedesticity
 
@@ -177,6 +171,7 @@ durbinWatsonTest(model.raw2)
 ncvTest(model.raw2)
 require(gvlma)
 gvlma(model.raw2)
+shapiro.test(model.full$residuals) #test for normality
 #check residuals plot: residuals vs x
 #Height have some kind of non-linear pattern
 res = model.raw2$residuals
@@ -184,7 +179,7 @@ plot(data.2$HEIGHT,res)
 abline(h=0)
 ```
 
-add heigh^2, 1/height or log(height) to the model: no increase in adj.R, but makes the model complex.
+add heigh^2,1/height or log(height) in the model: no increase in adj.R, but make the model complex.
 ```{r}
 data.3=data.2
 data.3$HEIGHT3 = 1/data.2$HEIGHT
@@ -193,7 +188,7 @@ data.3$HEIGHT3 = 1/data.2$HEIGHT
 
 ###5.use other models
 
-#(1)use Mallows'Cp to select variables: AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST
+#(1)use Mallows'Cp to select variables:AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST
 ```{r}
 par(mfrow=c(1,1))
 X <- model.matrix(model.full)[,-1]
@@ -205,12 +200,19 @@ Cpplot(g)
 model2 = lm(BODYFAT~AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST,data=data.3)
 ```
 
-#(2)use stepwise regression(AIC): AGE + WEIGHT + HEIGHT + ADIPOSITY + ABDOMEN + THIGH + BICEPS + WRIST
+#(2)use lasso to select
+AGE+HEIGHT+ABDOMEN+WRIST
+HEIGHT+ABODOMEN+WRIST
 ```{r}
-model.AIC <- step(model.full, k=2,direction="both")
-# use stepwise regression(BIC):WRIST+WEIGHT+ABDOMEN
-model.BIC <- step(model.full, k=log(242),direction="both")
+require(glmnet)
+y = as.matrix(data.3[,1])
+x = as.matrix(data.3[,-1])
+cvfit = cv.glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 0.8, standardize=TRUE,nfolds=10)
+plot(cvfit)
+fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=0.8, standardize=TRUE)
+(fit$beta)
 ```
+
 
 #(3)get test error by cross validation 
 #1.for full model
@@ -223,16 +225,6 @@ for(i in 1:100){
 cv.err1/100 
 ```
 
-#2.for full model with height/weight^1/3
-```{r}
-cv.err2 = 0
-model1 = glm(BODYFAT~.,data=data.3)
-for(i in 1:100){
-  cv.err2 = cv.err2+cv.glm(data.3,model1,K=10)$delta
-}
-cv.err2/100 
-```
-
 #3.for model select by MallowCp
 ```{r}
 cv.err3 = 0
@@ -243,53 +235,45 @@ for(i in 1:100){
 cv.err3/100 
 ```
 
-#4.for model selected by stepwise regression AIC
+#6.for model selected by lasso
 ```{r}
+#AGE+HEIGHT+ABDOMEN+WRIST
 cv.err4 = 0
-model1 = glm(BODYFAT~AGE + WEIGHT + ABDOMEN + THIGH + FOREARM + WRIST,data=data.3)
+model1 = glm(BODYFAT~AGE+HEIGHT+ABDOMEN+WRIST,data=data.3)
 for(i in 1:100){
   cv.err4 = cv.err4+cv.glm(data.3,model1,K=10)$delta
 }
-cv.err4/100 
-```
-
-#5.for model selected by stepwise BIC
-```{r}
+cv.err4/100
+#HEIGHT+ABDOMEN+WRIST
 cv.err5 = 0
-model1 = glm(BODYFAT~WEIGHT+ABDOMEN+WRIST,data=data.3)
+model1 = glm(BODYFAT~HEIGHT+ABDOMEN+WRIST,data=data.3)
 for(i in 1:100){
   cv.err5 = cv.err5+cv.glm(data.3,model1,K=10)$delta
 }
-cv.err5/100 
+cv.err5/100
 ```
 
-#6.for model selected by lasso
+#############################################################
+#############################################################
+#############################################################final model here
+Diagnostic with final model:HEIGHT+ABDOMEN+WRIST
 ```{r}
-require(glmnet)
-y = as.matrix(data.3[,1])
-x = as.matrix(data.3[,-1])
-cvfit = cv.glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 1, standardize=TRUE,nfolds=10)
-fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=1, standardize=TRUE)
-(fit$beta)
-#AGE+HEIGHT+ABDOMEN+WRIST
-cv.err6 = 0
-model1 = glm(BODYFAT~AGE+HEIGHT+ABDOMEN+WRIST,data=data.3)
-for(i in 1:100){
-  cv.err6 = cv.err6+cv.glm(data.3,model1,K=10)$delta
-}
-cv.err6/100 
+m.final = lm(BODYFAT~HEIGHT+ABDOMEN+WRIST,data=data.3)
+summary(m.final)
+plot(m.final)
+res = m.final$residuals
+plot(data.3$HEIGHT,res)
+gvlma(m.final)
 ```
 
 
 ```{r}
 library(gridExtra)
 library(grid)
-err = c(cv.err1[2],cv.err3[2],cv.err4[2],cv.err5[2],cv.err6[2])
-variables = c('Full model','AGE+WEIGHT+ABDOMEN+THIGH+WRIST',
-              'AGE + WEIGHT + ABDOMEN + THIGH + FOREARM + WRIST',
-              'WEIGHT+ABDOMEN+WRIST','AGE+HEIGHT+ABDOMEN+WRIST')
-method = c('Full model','Mallow Cp','Step regression(AIC)',
-           'Step regession(BIC)','Lasso')
+err = c(cv.err1[2],cv.err3[2],cv.err4[2],cv.err5[2])
+variables = c('Full model','AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST',
+              'AGE+HEIGHT+ABDOMEN+WRIST','AGE+HEIGHT+ABDOMEN+WRIST')
+method = c('Full model','Mallow Cp','Lasso','Lasso')
 result = data.frame(method,"cv error"=err/100,variables)
 grid.table(result)
 ```
