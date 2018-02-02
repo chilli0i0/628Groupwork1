@@ -23,7 +23,7 @@ unusual points checking rules:
 
 We try to delete (1),(2) abnormal points at the begining and other after fitting a multi-linear regression
 ```{r}
-data <- read.csv(file = "Data/BodyFat.csv")
+data <- read.csv(file = "../Data/BodyFat.csv")
 data <- data[, -c(1)]
 str(data)
 summary(data$BODYFAT)
@@ -35,7 +35,7 @@ which(data$BODYFAT==max(data$BODYFAT))
 
 use density to estimate bodyfat and compare with the observed bodyfat point 96 is likely to be an abnormal point
 ```{r}
-err = (495/data$DENSITY-450-data$BODYFAT)
+err = (495/data$DENSITY-450-data$BODYFAT) #siri's formula
 which(err==min(err))
 ```
 
@@ -61,7 +61,7 @@ data.1=data[-c(182,216,96,42),-c(2)]
 ```
 
 ###2.Visualization
-Most x has positive trend with y. And the multilinearity is heavy in this data set. Age here has a negetive trend with height, may because of age range in this data set.
+Most x's have a positive trend with y. And the multilinearity is heavy in this data set. Age here has a negative trend with height, may because of age range in this data set.
 ```{r}
 library('corrplot')
 library("RColorBrewer")
@@ -122,7 +122,7 @@ plot(model.raw, which=4)
 abline( h = 4/(248-15),lty=2 )
 ```
 
-remove abnormal points and high influencial points from the data
+remove abnormal points and high influential points from the data
 
 #(1)remove high influencial point 39,86,221
 
@@ -138,9 +138,9 @@ hat.plot <- function(fit){
 ```
 
 
-rule:cook's distance>4/(n-p), one each time(stop at point 86)
+rule: cook's distance>4/(n-p), one each time(stop at point 86)
 
-rule:no extreme values on other independent variables: 31,41,79
+rule: no extreme values on other independent variables: 31,41,79
 ```{r}
 data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163),-2]
 model.raw2 <- lm(BODYFAT ~ ., data = data.2)
@@ -152,7 +152,7 @@ data.3 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163, 31, 36, 54, 1
 
 ```
 
-Now, we use cleaned data to refit the mutivariate linear regression model, and we find that the asjusted R-square is 0.71 which is high enough. And, we can see the diagnostic plots. There is not any obvious outlier. And, from the plot we can guess that except for the normality assumption, no assumption of linear regression model is violeted.
+Now, we use cleaned data to refit the multivariate linear regression model and we find that the adjusted R-square is 0.71, which is high enough. Furthermore, we can inspect the diagnostic plots. There is not any obvious outlier. From the plot we can guess that except for the normality assumption, no assumption of linear regression model is violated.
 ```{r}
 model.full <- lm(BODYFAT ~ ., data = data.3)
 summary(model.full)
@@ -160,13 +160,13 @@ par(mfrow = c(2,2))
 plot(model.full)
 ```
 
-#(2)suspected outlier point:224(do not delete)
+#(2)suspected outlier point: 224(do not delete)
 ```{r}
 outlierTest(model.raw2)
 ```
 
 ###4. checking assumptions of the multi-linear model
-(1)check for independence:Durbin-Watson test has a p-value>0.05, satisfy
+(1)check for independence: Durbin-Watson test has a p-value>0.05, satisfy
 
 (2)check for homescedesticity
 
@@ -184,7 +184,7 @@ plot(data.2$HEIGHT,res)
 abline(h=0)
 ```
 
-add heigh^2,1/height or log(height) in the model: no increase in adj.R, but make the model complex.
+add heigh^2, 1/height or log(height) to the model: no increase in adj.R, but makes the model complex.
 ```{r}
 data.3=data.2
 data.3$HEIGHT3 = 1/data.2$HEIGHT
@@ -193,7 +193,7 @@ data.3$HEIGHT3 = 1/data.2$HEIGHT
 
 ###5.use other models
 
-#(1)use Mallows'Cp to select variables:AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST
+#(1)use Mallows'Cp to select variables: AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST
 ```{r}
 par(mfrow=c(1,1))
 X <- model.matrix(model.full)[,-1]
@@ -205,7 +205,7 @@ Cpplot(g)
 model2 = lm(BODYFAT~AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST,data=data.3)
 ```
 
-#(2)use stepwise regression(AIC):AGE + WEIGHT + HEIGHT + ADIPOSITY + ABDOMEN + THIGH + BICEPS + WRIST
+#(2)use stepwise regression(AIC): AGE + WEIGHT + HEIGHT + ADIPOSITY + ABDOMEN + THIGH + BICEPS + WRIST
 ```{r}
 model.AIC <- step(model.full, k=2,direction="both")
 # use stepwise regression(BIC):WRIST+WEIGHT+ABDOMEN
