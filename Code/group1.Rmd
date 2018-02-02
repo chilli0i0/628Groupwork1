@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: "codes"
 output: html_document
@@ -288,3 +289,339 @@ PLS有一个问题是cross-validation的结果没法从summary里面直接提取
 require("pls")
 fit.pls <- plsr(BODYFAT~.,data=data.scaled,scale=T,validation="CV")
 ```
+=======
+---
+title: "codes"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(gvlma)
+library(car)
+library(glmnet)
+library(psych)
+library(pls)
+library(boot)
+```
+
+###1 Data Backgroud
+There is no categorical variables in the model
+
+unusual points checking rules:
+(1)point with impossible values: 182(Bodyfat),216(Bodyfat),42(Height)
+(2)point differ 2 much between 2 measurement of body component: 96
+(3)extreme values: 79,39,31
+
+We try to delete (1),(2) abnormal points at the begining and other after fitting a multi-linear regression
+```{r}
+data <- read.csv(file = "Data/BodyFat.csv")
+data <- data[, -c(1)]
+str(data)
+summary(data$BODYFAT)
+which(data$BODYFAT==min(data$BODYFAT))
+which(data$BODYFAT==max(data$BODYFAT))
+```
+
+(1)use density to calculate bodyfat for instances 182,216, It seems that using Siri's formula will return -3.6 and 47.5, still not make sense,just delete.
+
+use density to estimate bodyfat and compare with the observed bodyfat point 96 is likely to be an abnormal point
+```{r}
+err = (495/data$DENSITY-450-data$BODYFAT)
+which(err==min(err))
+```
+
+
+(2)check for other independent variables
+
+abnormal: 42
+
+influential: 79 39 31(ankle)
+```{r}
+summary(data)
+which(data$HEIGHT==min(data$HEIGHT))
+#delete point 42 for extreme small value in height. We have no substitude
+hist(data$AGE)
+which(data$AGE==max(data$AGE))
+hist(data$WEIGHT)
+which(data$WEIGHT==max(data$WEIGHT))
+hist(data$NECK)
+which(data$NECK==max(data$NECK))
+which(data$ANKLE==max(data$ANKLE))
+
+data.1=data[-c(182,216,96,42),-c(2)]
+```
+
+###2.Visualization
+Most x has positive trend with y. And the multilinearity is heavy in this data set. Age here has a negetive trend with height, may because of age range in this data set.
+```{r}
+library('corrplot')
+library("RColorBrewer")
+M <- cor(data.1)
+cor.mtest <- function(mat, ...) {
+  mat <- as.matrix(mat)
+  n <- ncol(mat)
+  p.mat<- matrix(NA, n, n)
+  diag(p.mat) <- 0
+  for (i in 1:(n - 1)) {
+    for (j in (i + 1):n) {
+      tmp <- cor.test(mat[, i], mat[, j], ...)
+      p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+    }
+  }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+# matrix of the p-value of the correlation
+p.mat <- cor.mtest(data.1)
+corrplot(M, type="upper", order="hclust",col=brewer.pal(n=8, name="PuOr"),
+         tl.col="black",sig.level = 0.01,p.mat=p.mat,insig = "blank",
+         title="correlation plot",tl.cex=0.6,mar=c(0,0,1,0))
+```
+
+#############################################################################
+###3.Model fitting
+First, fit a multi-linear regression model with possible variables.From the VIF values we can see that the multicolinearity is heavy.
+
+Because the multilinearity will not affect model diagnostic for abnormal points, we tried to detect abnormal points with residuals plot first and then dealt with multicolinearity problem.
+```{r}
+model.raw <- lm(BODYFAT ~ ., data = data.1)
+summary(model.raw)
+par(mfrow = c(2,2))
+plot(model.raw)
+require(car)
+v = vif(model.raw)
+library(gridExtra)
+library(grid)
+r1 = names(v)[1:7]
+r2 = round(v[1:7],2)
+r3 = names(v)[8:14]
+r4 = round(v[8:14],2)
+r = rbind(r1,r2,r3,r4);colnames(r) = NULL;rownames(r) = NULL
+table <- tableGrob(r)
+grid.newpage()
+h <- grobHeight(table)
+w <- grobWidth(table)
+title <- textGrob("VIF for full model", y=unit(0.5,"npc") + 1*h, 
+                  vjust=0, gp=gpar(fontsize=20))
+gt <- gTree(children=gList(table, title))
+grid.draw(gt)
+v = data.frame(VIF=round(v,2))
+
+grid.table(r,main="VIF")
+par(mfrow = c(1,1))
+plot(model.raw, which=4)
+abline( h = 4/(248-15),lty=2 )
+```
+
+remove abnormal points and high influencial points from the data
+
+#(1)remove high influencial point 39,86,221
+
+function used for calculate the hat matrix
+```{r}
+hat.plot <- function(fit){
+  p <- length(coefficients(fit))
+  n <- length(fitted(fit))
+  plot(hatvalues(fit),main = "Index Plot of Hat Values")
+  abline(h=c(2,3)*p/n,col="red",lty=2)
+  identify(1:n, hatvalues(fit), names(hatvalues(fit)))  
+}
+```
+
+
+rule:cook's distance>4/(n-p), one each time(stop at point 86)
+
+rule:no extreme values on other independent variables: 31,41,79
+```{r}
+data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163),-2]
+model.raw2 <- lm(BODYFAT ~ ., data = data.2)
+plot(model.raw2, which=4)
+abline( h = 4/(241-15),lty=2 )
+model.raw2 <- lm(BODYFAT ~ ., data = data.2)
+hat.plot(model.raw2)
+data.3 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163, 31, 36, 54, 175, 106, 159, 206),-2]
+
+```
+
+Now, we use cleaned data to refit the mutivariate linear regression model, and we find that the asjusted R-square is 0.71 which is high enough. And, we can see the diagnostic plots. There is not any obvious outlier. And, from the plot we can guess that except for the normality assumption, no assumption of linear regression model is violeted.
+```{r}
+model.full <- lm(BODYFAT ~ ., data = data.3)
+summary(model.full)
+par(mfrow = c(2,2))
+plot(model.full)
+```
+
+#(2)suspected outlier point:224(do not delete)
+```{r}
+outlierTest(model.raw2)
+```
+
+###4. checking assumptions of the multi-linear model
+(1)check for independence:Durbin-Watson test has a p-value>0.05, satisfy
+
+(2)check for homescedesticity
+
+(3)check for linear assumption
+
+```{r}
+durbinWatsonTest(model.raw2)
+ncvTest(model.raw2)
+require(gvlma)
+gvlma(model.raw2)
+#check residuals plot: residuals vs x
+#Height have some kind of non-linear pattern
+res = model.raw2$residuals
+plot(data.2$HEIGHT,res)
+abline(h=0)
+```
+
+add heigh^2,1/height or log(height) in the model: no increase in adj.R, but make the model complex.
+```{r}
+data.3=data.2
+data.3$HEIGHT3 = 1/data.2$HEIGHT
+```
+
+
+###5.use other models
+
+#(1)use Mallows'Cp to select variables:AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST
+```{r}
+par(mfrow=c(1,1))
+X <- model.matrix(model.full)[,-1]
+Y <- data.3[,1]
+library(leaps) # for leaps
+library(faraway) # for Cpplot
+g <- leaps(X, Y,nbest=1)
+Cpplot(g) 
+model2 = lm(BODYFAT~AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST,data=data.3)
+```
+
+#(2)use stepwise regression(AIC):AGE + WEIGHT + HEIGHT + ADIPOSITY + ABDOMEN + THIGH + BICEPS + WRIST
+```{r}
+model.AIC <- step(model.full, k=2,direction="both")
+# use stepwise regression(BIC):WRIST+WEIGHT+ABDOMEN
+model.BIC <- step(model.full, k=log(242),direction="both")
+```
+
+#(3)get test error by cross validation 
+#1.for full model
+```{r}
+cv.err1 = 0
+model1 = glm(BODYFAT~.,data=data.3)
+for(i in 1:100){
+  cv.err1 = cv.err1+cv.glm(data.3,model1,K=10)$delta
+}
+cv.err1/100 
+```
+
+#2.for full model with height/weight^1/3
+```{r}
+cv.err2 = 0
+model1 = glm(BODYFAT~.,data=data.3)
+for(i in 1:100){
+  cv.err2 = cv.err2+cv.glm(data.3,model1,K=10)$delta
+}
+cv.err2/100 
+```
+
+#3.for model select by MallowCp
+```{r}
+cv.err3 = 0
+model1 = glm(BODYFAT~AGE+WEIGHT+ABDOMEN+THIGH+WRIST,data=data.3)
+for(i in 1:100){
+  cv.err3 = cv.err3+cv.glm(data.3,model1,K=10)$delta
+}
+cv.err3/100 
+```
+
+#4.for model selected by stepwise regression AIC
+```{r}
+cv.err4 = 0
+model1 = glm(BODYFAT~AGE + WEIGHT + ABDOMEN + THIGH + FOREARM + WRIST,data=data.3)
+for(i in 1:100){
+  cv.err4 = cv.err4+cv.glm(data.3,model1,K=10)$delta
+}
+cv.err4/100 
+```
+
+#5.for model selected by stepwise BIC
+```{r}
+cv.err5 = 0
+model1 = glm(BODYFAT~WEIGHT+ABDOMEN+WRIST,data=data.3)
+for(i in 1:100){
+  cv.err5 = cv.err5+cv.glm(data.3,model1,K=10)$delta
+}
+cv.err5/100 
+```
+
+#6.for model selected by lasso
+```{r}
+require(glmnet)
+y = as.matrix(data.3[,1])
+x = as.matrix(data.3[,-1])
+cvfit = cv.glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 1, standardize=TRUE,nfolds=10)
+fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=1, standardize=TRUE)
+(fit$beta)
+#AGE+HEIGHT+ABDOMEN+WRIST
+cv.err6 = 0
+model1 = glm(BODYFAT~AGE+HEIGHT+ABDOMEN+WRIST,data=data.3)
+for(i in 1:100){
+  cv.err6 = cv.err6+cv.glm(data.3,model1,K=10)$delta
+}
+cv.err6/100 
+```
+
+
+```{r}
+library(gridExtra)
+library(grid)
+err = c(cv.err1[2],cv.err3[2],cv.err4[2],cv.err5[2],cv.err6[2])
+variables = c('Full model','AGE+WEIGHT+ABDOMEN+THIGH+WRIST',
+              'AGE + WEIGHT + ABDOMEN + THIGH + FOREARM + WRIST',
+              'WEIGHT+ABDOMEN+WRIST','AGE+HEIGHT+ABDOMEN+WRIST')
+method = c('Full model','Mallow Cp','Step regression(AIC)',
+           'Step regession(BIC)','Lasso')
+result = data.frame(method,"cv error"=err/100,variables)
+grid.table(result)
+```
+
+
+#(4)PCA
+```{r}
+data.scaled <- as.data.frame(scale(data.2, center = TRUE, scale = TRUE))
+cv.err7 = 0
+model1 = glm(BODYFAT~AGE+HEIGHT+ABDOMEN+WRIST,data=data.scaled)
+for(i in 1:100){
+  cv.err7 = cv.err7+cv.glm(data.scaled,model1,K=10)$delta
+}
+cv.err7/100 
+
+require(psych)
+fa.parallel(data.scaled[,-1], fa = "pc", n.iter = 1000, show.legend = FALSE, main = "Scree plot with parallel analysis")
+get.cv.prin <- function(n)
+{
+  covmatrix <- cov(data.scaled[,-1])
+  eigen.vector <- eigen(covmatrix)$vectors
+  eigen.vector.n <- eigen.vector[,1:n]
+  prin.data.n <- as.matrix(data.scaled[,-1]) %*% eigen.vector.n
+  data.frame.n <- as.data.frame(cbind(data.scaled[,1], prin.data.n))
+  cv.err <- rep(0,100)
+  for(i in 1:100) {
+    glm.fit <- glm(V1 ~ V2 + V3, data = data.frame.n)
+    cv.err[i] = cv.glm(data.frame.n,glm.fit,K=10)$delta[2]
+  }
+  plot(cv.err)
+  print(mean(cv.err))
+}
+get.cv.prin(2)
+```
+
+
+#(5)PLS
+PLS有一个问题是cross-validation的结果没法从summary里面直接提取出来，但是是肯定比lasso和PCA差的
+```{r}
+require("pls")
+fit.pls <- plsr(BODYFAT~.,data=data.scaled,scale=T,validation="CV")
+```
+>>>>>>> 458a2e4c7691da346be918dbb47cef629828bd14
