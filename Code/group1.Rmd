@@ -1,6 +1,8 @@
 ---
 title: "codes"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r}
 library(gvlma)
@@ -96,7 +98,25 @@ summary(model.raw)
 par(mfrow = c(2,2))
 plot(model.raw)
 require(car)
-vif(model.raw)
+v = vif(model.raw)
+library(gridExtra)
+library(grid)
+r1 = names(v)[1:7]
+r2 = round(v[1:7],2)
+r3 = names(v)[8:14]
+r4 = round(v[8:14],2)
+r = rbind(r1,r2,r3,r4);colnames(r) = NULL;rownames(r) = NULL
+table <- tableGrob(r)
+grid.newpage()
+h <- grobHeight(table)
+w <- grobWidth(table)
+title <- textGrob("VIF for full model", y=unit(0.5,"npc") + 1*h, 
+                  vjust=0, gp=gpar(fontsize=20))
+gt <- gTree(children=gList(table, title))
+grid.draw(gt)
+v = data.frame(VIF=round(v,2))
+
+grid.table(r,main="VIF")
 par(mfrow = c(1,1))
 plot(model.raw, which=4)
 abline( h = 4/(248-15),lty=2 )
@@ -104,16 +124,40 @@ abline( h = 4/(248-15),lty=2 )
 
 remove abnormal points and high influencial points from the data
 
-#(1)remove high influencial/leverage point 39,86,221
+#(1)remove high influencial point 39,86,221
 
-rule:leverage>4/(n-p), one each time(stop at point 86)
+function used for calculate the hat matrix
+```{r}
+hat.plot <- function(fit){
+  p <- length(coefficients(fit))
+  n <- length(fitted(fit))
+  plot(hatvalues(fit),main = "Index Plot of Hat Values")
+  abline(h=c(2,3)*p/n,col="red",lty=2)
+  identify(1:n, hatvalues(fit), names(hatvalues(fit)))  
+}
+```
+
+
+rule:cook's distance>4/(n-p), one each time(stop at point 86)
 
 rule:no extreme values on other independent variables: 31,41,79
 ```{r}
-data.2 = data[-c(182,216,96,42,39,221,86,31,41,79),-2]
+data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163),-2]
 model.raw2 <- lm(BODYFAT ~ ., data = data.2)
 plot(model.raw2, which=4)
-abline( h = 4/(242-15),lty=2 )
+abline( h = 4/(241-15),lty=2 )
+model.raw2 <- lm(BODYFAT ~ ., data = data.2)
+hat.plot(model.raw2)
+data.3 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163, 31, 36, 54, 175, 106, 159, 206),-2]
+
+```
+
+Now, we use cleaned data to refit the mutivariate linear regression model, and we find that the asjusted R-square is 0.71 which is high enough. And, we can see the diagnostic plots. There is not any obvious outlier. And, from the plot we can guess that except for the normality assumption, no assumption of linear regression model is violeted.
+```{r}
+model.full <- lm(BODYFAT ~ ., data = data.3)
+summary(model.full)
+par(mfrow = c(2,2))
+plot(model.full)
 ```
 
 #(2)suspected outlier point:224(do not delete)
@@ -149,32 +193,32 @@ data.3$HEIGHT3 = 1/data.2$HEIGHT
 
 ###5.use other models
 
-#(1)use Mallows'Cp to select variables:AGE+WEIGHT+ABDOMEN+THIGH+WRIST
+#(1)use Mallows'Cp to select variables:AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST
 ```{r}
-X <- model.matrix(model.raw2)[,-1]
-Y <- data.2[,1]
+par(mfrow=c(1,1))
+X <- model.matrix(model.full)[,-1]
+Y <- data.3[,1]
 library(leaps) # for leaps
 library(faraway) # for Cpplot
 g <- leaps(X, Y,nbest=1)
 Cpplot(g) 
-model2 = lm(BODYFAT~AGE+WEIGHT+ABDOMEN+THIGH+WRIST,data=data.2)
-
+model2 = lm(BODYFAT~AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST,data=data.3)
 ```
 
-#(2)use stepwise regression(AIC):AGE + WEIGHT + ABDOMEN + THIGH + FOREARM + WRIST
+#(2)use stepwise regression(AIC):AGE + WEIGHT + HEIGHT + ADIPOSITY + ABDOMEN + THIGH + BICEPS + WRIST
 ```{r}
-model.AIC <- step(model.raw2, k=2,direction="both")
+model.AIC <- step(model.full, k=2,direction="both")
 # use stepwise regression(BIC):WRIST+WEIGHT+ABDOMEN
-model.BIC <- step(model.raw2, k=log(242),direction="both")
+model.BIC <- step(model.full, k=log(242),direction="both")
 ```
 
 #(3)get test error by cross validation 
 #1.for full model
 ```{r}
 cv.err1 = 0
-model1 = glm(BODYFAT~.,data=data.2)
+model1 = glm(BODYFAT~.,data=data.3)
 for(i in 1:100){
-  cv.err1 = cv.err1+cv.glm(data.2,model1,K=10)$delta
+  cv.err1 = cv.err1+cv.glm(data.3,model1,K=10)$delta
 }
 cv.err1/100 
 ```
@@ -222,11 +266,11 @@ cv.err5/100
 #6.for model selected by lasso
 ```{r}
 require(glmnet)
-y = as.matrix(data.2[,1])
-x = as.matrix(data.2[,-1])
+y = as.matrix(data.3[,1])
+x = as.matrix(data.3[,-1])
 cvfit = cv.glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 1, standardize=TRUE,nfolds=10)
 fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=1, standardize=TRUE)
-which(fit$beta==0)
+(fit$beta)
 #AGE+HEIGHT+ABDOMEN+WRIST
 cv.err6 = 0
 model1 = glm(BODYFAT~AGE+HEIGHT+ABDOMEN+WRIST,data=data.3)
