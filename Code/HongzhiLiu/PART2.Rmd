@@ -1,0 +1,46 @@
+
+Part 2 Multi-linear regression and diagnostics We first fit a multi-linear regression on all variables and carry out model diagnostics. (1)remove influencial points: 39, 86, 221, 86, 192, 41, 250, 163 rule:Cook's Distance > 4/(n-p). Remove one point each time (2)remove high leverage points:36, 54, 175, 106, 159, 206. rule: leverage > 3 * p / n (3)remove outliers: No obvious outlier.
+
+```{r}
+hat.plot <- function(fit){
+  p <- length(coefficients(fit))
+  n <- length(fitted(fit))
+  plot(hatvalues(fit),main = "Index Plot of Hat Values")
+  abline(h=c(2,3)*p/n,col="red",lty=2)
+  identify(1:n, hatvalues(fit), names(hatvalues(fit)))  
+}
+```
+ 
+```{r} 
+model.raw <- lm(BODYFAT ~ ., data = data.1)
+require(car)    #I change the order of residuals plot and vif calculation here
+vif(model.raw)
+par(mfrow = c(2,2))
+plot(model.raw)
+par(mfrow = c(1,1))
+plot(model.raw, which=4)
+abline( h = 4/(248-15),lty=2 )
+data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163),-2]   #points differ
+model.raw2 <- lm(BODYFAT ~ ., data = data.2)
+outlierTest(model.raw2)
+data[224,]  #suspected outlier, but do not delete at 5%
+hat.plot(model.raw2)
+data.3 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163, 31, 36, 54, 175, 106, 159, 206),-2]
+```
+(2) Now, we use cleaned data to refit the mutivariate linear regression model, and we find that the asjusted R-square is 0.71 which is high enough. And, we can see the diagnostic plots. There is not any obvious outlier. And, from the plot we can guess that except for the normality assumption, no assumption of linear regression model is violeted.
+
+```{r}
+model.full <- lm(BODYFAT ~ ., data = data.3)
+summary(model.full)
+par(mfrow = c(2,2))
+plot(model.full)
+```
+
+(3)check the assumptions of the linear model (a) independent assumption (Durbin-Watson Test) (p = 0.16)(b) homescedesticity assumption (Score Test) (p = 0.39)  (3) normality assumption (Shapiro-Wilk Test). (p = 0.12) First two assumptions are not violated. But normality assumption is slightly violated.
+```{r}
+durbinWatsonTest(model.full)  #test for independence
+ncvTest(model.full)   #test for homescedesticity
+shapiro.test(model.full$residuals) #test for normality
+```
+
+
