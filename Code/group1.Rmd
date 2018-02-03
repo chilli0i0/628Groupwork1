@@ -120,7 +120,11 @@ abline( h = 4/(248-15),lty=2 )
 
 remove abnormal points and high influencial points from the data
 
-#(1)remove high influencial point 39,86,221
+(1)remove influencial points: 39, 86, 221, 86, 192, 41, 250, 163 rule:Cook's Distance > 4/(n-p). Remove one point each time 
+
+(2)remove high leverage points:36, 54, 175, 106, 159, 206. rule: leverage > 3 * p / n
+
+(3)remove outliers: No obvious outlier.
 
 function used for calculate the hat matrix
 ```{r}
@@ -134,9 +138,6 @@ hat.plot <- function(fit){
 ```
 
 
-rule:cook's distance>4/(n-p), one each time(stop at point 86)
-
-rule:no extreme values on other independent variables: 31,41,79
 ```{r}
 data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163),-2]   #points differ
 model.raw2 <- lm(BODYFAT ~ ., data = data.2)
@@ -144,6 +145,7 @@ outlierTest(model.raw2)
 data[224,]  #suspected outlier, but do not delete at 5%
 hat.plot(model.raw2)
 data.3 = data[-c(182, 216, 96, 42, 39, 221, 86, 192, 41, 250, 163, 31, 36, 54, 175, 106, 159, 206),-2]
+outlierTest(model.raw2)
 ```
 
 Now, we use cleaned data to refit the mutivariate linear regression model, and we find that the asjusted R-square is 0.71 which is high enough. And, we can see the diagnostic plots. There is not any obvious outlier. And, from the plot we can guess that except for the normality assumption, no assumption of linear regression model is violeted.
@@ -152,11 +154,6 @@ model.full <- lm(BODYFAT ~ ., data = data.3)
 summary(model.full)
 par(mfrow = c(2,2))
 plot(model.full)
-```
-
-#(2)suspected outlier point:224(do not delete)
-```{r}
-outlierTest(model.raw2)
 ```
 
 ###4. checking assumptions of the multi-linear model
@@ -179,13 +176,6 @@ plot(data.2$HEIGHT,res)
 abline(h=0)
 ```
 
-add heigh^2,1/height or log(height) in the model: no increase in adj.R, but make the model complex.
-```{r}
-data.3=data.2
-data.3$HEIGHT3 = 1/data.2$HEIGHT
-```
-
-
 ###5.use other models
 
 #(1)use Mallows'Cp to select variables:AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST
@@ -207,9 +197,9 @@ HEIGHT+ABODOMEN+WRIST
 require(glmnet)
 y = as.matrix(data.3[,1])
 x = as.matrix(data.3[,-1])
-cvfit = cv.glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 0.8, standardize=TRUE,nfolds=10)
+cvfit = cv.glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 1, standardize=TRUE,nfolds=10)
 plot(cvfit)
-fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=0.8, standardize=TRUE)
+fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=1, standardize=TRUE)
 (fit$beta)
 ```
 
@@ -225,37 +215,38 @@ for(i in 1:100){
 cv.err1/100 
 ```
 
-#3.for model select by MallowCp
+#1.for model select by MallowCp
 ```{r}
-cv.err3 = 0
+cv.err2 = 0
 model1 = glm(BODYFAT~AGE+WEIGHT+ABDOMEN+THIGH+WRIST,data=data.3)
 for(i in 1:100){
-  cv.err3 = cv.err3+cv.glm(data.3,model1,K=10)$delta
+  cv.err2 = cv.err2+cv.glm(data.3,model1,K=10)$delta
 }
-cv.err3/100 
+cv.err2/100 
 ```
 
 #6.for model selected by lasso
 ```{r}
 #AGE+HEIGHT+ABDOMEN+WRIST
-cv.err4 = 0
+cv.err3 = 0
 model1 = glm(BODYFAT~AGE+HEIGHT+ABDOMEN+WRIST,data=data.3)
+for(i in 1:100){
+  cv.err3 = cv.err3+cv.glm(data.3,model1,K=10)$delta
+}
+cv.err3/100
+#HEIGHT+ABDOMEN+WRIST
+cv.err4 = 0
+model1 = glm(BODYFAT~HEIGHT+ABDOMEN+WRIST,data=data.3)
 for(i in 1:100){
   cv.err4 = cv.err4+cv.glm(data.3,model1,K=10)$delta
 }
 cv.err4/100
-#HEIGHT+ABDOMEN+WRIST
-cv.err5 = 0
-model1 = glm(BODYFAT~HEIGHT+ABDOMEN+WRIST,data=data.3)
-for(i in 1:100){
-  cv.err5 = cv.err5+cv.glm(data.3,model1,K=10)$delta
-}
-cv.err5/100
 ```
 
 #############################################################
 #############################################################
-#############################################################final model here
+#############################################################
+#final model here
 Diagnostic with final model:HEIGHT+ABDOMEN+WRIST
 ```{r}
 m.final = lm(BODYFAT~HEIGHT+ABDOMEN+WRIST,data=data.3)
@@ -270,7 +261,7 @@ gvlma(m.final)
 ```{r}
 library(gridExtra)
 library(grid)
-err = c(cv.err1[2],cv.err3[2],cv.err4[2],cv.err5[2])
+err = c(cv.err1[2],cv.err2[2],cv.err3[2],cv.err4[2])
 variables = c('Full model','AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST',
               'AGE+HEIGHT+ABDOMEN+WRIST','AGE+HEIGHT+ABDOMEN+WRIST')
 method = c('Full model','Mallow Cp','Lasso','Lasso')
