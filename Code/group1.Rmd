@@ -4,7 +4,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-All 
+All packages required
 ```{r}
 library(gvlma)
 library(car)
@@ -70,7 +70,7 @@ data.1=data[-c(182,216,96,42),-c(2)]
 ###2.Visualization
 Most x has positive trend with y. And the multilinearity is heavy in this data set. Age here has a negetive trend with height, may because of age range in this data set.
 ```{r}
-jpeg('Image/corrplot.jpg',width=310,height=400)
+png('Image/corrplot.png',width=310,height=400,res=150)
 library('corrplot')
 library("RColorBrewer")
 M <- cor(data.1)
@@ -99,33 +99,34 @@ dev.off()
 Scatter plots for bodyfat vs independent variables
 ```{r}
 jpeg('Image/scatter1.jpg',width=720,height=640)
-p1 <- ggplot(data.1, aes(x=AGE,y=BODYFAT))+geom_point()+ggtitle("AGE")+
-  geom_smooth(method='lm')
-p2 <- ggplot(data.1, aes(x=WEIGHT,y=BODYFAT))+geom_point()+ggtitle("WEIGHT")+
-  geom_smooth(method='lm')
-p3 <- ggplot(data.1, aes(x=HEIGHT,y=BODYFAT))+geom_point()+ggtitle("HEIGHT")+
-  geom_smooth(method='lm')
-p4 <- ggplot(data.1, aes(x=ADIPOSITY,y=BODYFAT))+geom_point()+ggtitle("ADIPOSITY")+ geom_smooth(method='lm')
-p5 <- ggplot(data.1, aes(x=NECK,y=BODYFAT))+geom_point()+ggtitle("NECK")+
-  geom_smooth(method='lm')
-p6 <- ggplot(data.1, aes(x=CHEST,y=BODYFAT))+geom_point()+ggtitle("CHEST")+
-  geom_smooth(method='lm')
-p7 <- ggplot(data.1, aes(x=ABDOMEN,y=BODYFAT))+geom_point()+ggtitle("ABDOMEN")+
-  geom_smooth(method='lm')
-p8 <- ggplot(data.1, aes(x=HIP,y=BODYFAT))+geom_point()+ggtitle("HIP")+
-  geom_smooth(method='lm')
-p9 <- ggplot(data.1, aes(x=THIGH,y=BODYFAT))+geom_point()+ggtitle("THIGH")+
-  geom_smooth(method='lm')
-p10 <- ggplot(data.1, aes(x=KNEE,y=BODYFAT))+geom_point()+ggtitle("KNEE")+
-  geom_smooth(method='lm')
-p11 <- ggplot(data.1, aes(x=ANKLE,y=BODYFAT))+geom_point()+ggtitle("ANKLE")+
-  geom_smooth(method='lm')
-p12 <- ggplot(data.1, aes(x=BICEPS,y=BODYFAT))+geom_point()+ggtitle("BICEPS")+
-  geom_smooth(method='lm')
-p13 <- ggplot(data.1, aes(x=FOREARM,y=BODYFAT))+geom_point()+ggtitle("FOREARM")+
-  geom_smooth(method='lm')
-p14 <- ggplot(data.1, aes(x=WRIST,y=BODYFAT))+geom_point()+ggtitle("WRIST")+
-  geom_smooth(method='lm')
+p1 <- ggplot(data.1, aes(x=AGE,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10))
+p2 <- ggplot(data.1, aes(x=WEIGHT,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p3 <- ggplot(data.1, aes(x=HEIGHT,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p4 <- ggplot(data.1, aes(x=ADIPOSITY,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p5 <- ggplot(data.1, aes(x=NECK,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10))
+p6 <- ggplot(data.1, aes(x=CHEST,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p7 <- ggplot(data.1, aes(x=ABDOMEN,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p8 <- ggplot(data.1, aes(x=HIP,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p9 <- ggplot(data.1, aes(x=THIGH,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10))
+p10 <- ggplot(data.1, aes(x=KNEE,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p11 <- ggplot(data.1, aes(x=ANKLE,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p12 <- ggplot(data.1, aes(x=BICEPS,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p13 <- ggplot(data.1, aes(x=FOREARM,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10))
+p14 <- ggplot(data.1, aes(x=WRIST,y=BODYFAT))+geom_point(size=0.7)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
 grid.arrange(p1,p1,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,ncol = 4, nrow = 4)
 dev.off()
 ```
@@ -138,7 +139,7 @@ Because the multilinearity will not affect model diagnostic for abnormal points,
 ```{r}
 model.raw <- lm(BODYFAT ~ ., data = data.1)
 summary(model.raw)
-jpeg('Image/diag1.jpg',width=400,height=300)
+jpeg('Image/diag1.jpg',width=500,height=450)
 autoplot(model.raw)
 dev.off()
 require(car)
@@ -229,7 +230,7 @@ abline(h=0)
 
 ```{r}
 r1 = c('independence','homoscedasticity','linearity','normality')
-r2 = c('DurbinWatson test','ncv Test','gvlma test','shapiro test')
+r2 = c('DurbinWatson test','Score test','gvlma test','Shapiro-Wilk test')
 r3 = c(0.15,0.77,0.08,0.19)
 r = data.frame('Assumption'=r1,'test'=r2,'p-value'=r3)
 table <- tableGrob(r,rows=NULL)
@@ -292,7 +293,8 @@ model2 = glm(BODYFAT~AGE+WEIGHT+ABDOMEN+THIGH+WRIST,data=data.3)
 for(i in 1:100){
   cv.err2 = cv.err2+cv.glm(data.3,model2,K=10)$delta
 }
-cv.err2/100 
+cv.err2/100
+model2 = lm(BODYFAT~AGE+WEIGHT+ABDOMEN+THIGH+WRIST,data=data.3)
 ```
 
 #6.for model selected by lasso
@@ -347,7 +349,7 @@ gvlma(m.final)
 ```{r}
 err = c(cv.err1[2],cv.err2[2],cv.err3[2],cv.err4[2])
 variables = c('Full model','AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST',
-              'AGE+HEIGHT+ABDOMEN+WRIST','AGE+HEIGHT+ABDOMEN+WRIST')
+              'AGE+HEIGHT+ABDOMEN+WRIST','HEIGHT+ABDOMEN+WRIST')
 AdjR = c(summary(model.full)$adj.r.squared,summary(model2)$adj.r.squared,summary(model3)$adj.r.squared,summary(m.final)$adj.r.squared)
 method = c('Full model','Mallow Cp','Lasso','Lasso')
 result = data.frame(method,"cv error"=err/100,AdjR,variables)
@@ -361,7 +363,6 @@ gt <- gTree(children=gList(result, title))
 jpeg('Image/mcomparison.jpg')
 grid.draw(gt)
 dev.off()
-grid.table(result)
 ```
 
 
@@ -397,8 +398,9 @@ get.cv.prin(2)
 
 
 #(5)PLS
-PLS有一个问题是cross-validation的结果没法从summary里面直接提取出来，但是是肯定比lasso和PCA差的
 ```{r}
 require("pls")
 fit.pls <- plsr(BODYFAT~.,data=data.scaled,scale=T,validation="CV")
 ```
+
+PCA and PLS all have worse result than lasso.
