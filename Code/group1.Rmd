@@ -98,37 +98,36 @@ dev.off()
 
 Scatter plots for bodyfat vs independent variables
 ```{r}
-jpeg('Image/scatter1.jpg',width=720,height=640)
-p1 <- ggplot(data.1, aes(x=AGE,y=BODYFAT))+geom_point(size=0.7)+
+p1 <- ggplot(data.1, aes(x=AGE,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10))
-p2 <- ggplot(data.1, aes(x=WEIGHT,y=BODYFAT))+geom_point(size=0.7)+
+p2 <- ggplot(data.1, aes(x=WEIGHT,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p3 <- ggplot(data.1, aes(x=HEIGHT,y=BODYFAT))+geom_point(size=0.7)+
+p3 <- ggplot(data.1, aes(x=HEIGHT,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p4 <- ggplot(data.1, aes(x=ADIPOSITY,y=BODYFAT))+geom_point(size=0.7)+
+p4 <- ggplot(data.1, aes(x=ADIPOSITY,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p5 <- ggplot(data.1, aes(x=NECK,y=BODYFAT))+geom_point(size=0.7)+
+p5 <- ggplot(data.1, aes(x=NECK,y=BODYFAT))+geom_point(size=0.5)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p6 <- ggplot(data.1, aes(x=CHEST,y=BODYFAT))+geom_point(size=0.5)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p7 <- ggplot(data.1, aes(x=ABDOMEN,y=BODYFAT))+geom_point(size=0.5)+
+  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
+p8 <- ggplot(data.1, aes(x=HIP,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10))
-p6 <- ggplot(data.1, aes(x=CHEST,y=BODYFAT))+geom_point(size=0.7)+
+p9 <- ggplot(data.1, aes(x=THIGH,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p7 <- ggplot(data.1, aes(x=ABDOMEN,y=BODYFAT))+geom_point(size=0.7)+
+p10 <- ggplot(data.1, aes(x=KNEE,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p8 <- ggplot(data.1, aes(x=HIP,y=BODYFAT))+geom_point(size=0.7)+
+p11 <- ggplot(data.1, aes(x=ANKLE,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p9 <- ggplot(data.1, aes(x=THIGH,y=BODYFAT))+geom_point(size=0.7)+
-  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10))
-p10 <- ggplot(data.1, aes(x=KNEE,y=BODYFAT))+geom_point(size=0.7)+
+p12 <- ggplot(data.1, aes(x=BICEPS,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p11 <- ggplot(data.1, aes(x=ANKLE,y=BODYFAT))+geom_point(size=0.7)+
+p13 <- ggplot(data.1, aes(x=FOREARM,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p12 <- ggplot(data.1, aes(x=BICEPS,y=BODYFAT))+geom_point(size=0.7)+
+p14 <- ggplot(data.1, aes(x=WRIST,y=BODYFAT))+geom_point(size=0.5)+
   geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-p13 <- ggplot(data.1, aes(x=FOREARM,y=BODYFAT))+geom_point(size=0.7)+
-  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10))
-p14 <- ggplot(data.1, aes(x=WRIST,y=BODYFAT))+geom_point(size=0.7)+
-  geom_smooth(method='lm')+theme_bw()+theme(text = element_text(size=10),axis.title.y=element_blank())
-grid.arrange(p1,p1,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,ncol = 4, nrow = 4)
-dev.off()
+options(repr.plot.width=9, repr.plot.height=4)
+grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,ncol = 7, nrow = 2)
 ```
 
 #############################################################################
@@ -139,9 +138,8 @@ Because the multilinearity will not affect model diagnostic for abnormal points,
 ```{r}
 model.raw <- lm(BODYFAT ~ ., data = data.1)
 summary(model.raw)
-jpeg('Image/diag1.jpg',width=500,height=450)
-autoplot(model.raw)
-dev.off()
+options(repr.plot.width=5.5, repr.plot.height=3.5)
+autoplot(model.raw,colour='cadetblue3')+theme(text = element_text(size=10),plot.title = element_text(hjust = 0.5,size=10))
 require(car)
 v = sort(vif(model.raw),decreasing = TRUE)
 r1 = names(v)[1:7];r2 = round(v[1:7],2)
@@ -154,14 +152,11 @@ w <- grobWidth(table)
 title <- textGrob("VIF for full model", y=unit(0.5,"npc") + 1*h, 
                   vjust=0, gp=gpar(fontsize=15))
 gt <- gTree(children=gList(table, title))
-jpeg('Image/vif1.jpg')
 grid.draw(gt)
-dev.off()
 
 cook1<-ggplot(model.raw, aes(seq_along(.cooksd), .cooksd))+geom_bar(stat="identity", position="identity")
 cook1<-cook1+xlab("Obs. Number")+ylab("Cook's distance")
 cook1<-cook1+ggtitle("Cook's distance before delete observations")
-
 ```
 
 remove abnormal points and high influencial points from the data
@@ -197,15 +192,13 @@ Now, we use cleaned data to refit the mutivariate linear regression model, and w
 ```{r}
 model.full <- lm(BODYFAT ~ ., data = data.3)
 summary(model.full)
-jpeg('Image/diag2.jpeg',width=400,height=300)
-autoplot(model.full)
-dev.off()
+options(repr.plot.width=5.5, repr.plot.height=3.5)
+autoplot(model.full,colour='cadetblue3')+theme(text = element_text(size=10),plot.title = element_text(hjust = 0.5,size=10))
+
 cook2<-ggplot(model.full, aes(seq_along(.cooksd), .cooksd))+geom_bar(stat="identity", position="identity")
 cook2<-cook2+xlab("Obs. Number")+ylab("Cook's distance")
 cook2<-cook2+ggtitle("Cook's distance after delete observations")
-jpeg('Image/cook.jpeg',width=500,height=300)
 grid.arrange(cook1,cook2,ncol=2)
-dev.off()
 ```
 
 ###4. checking assumptions of the multi-linear model
@@ -240,9 +233,7 @@ w <- grobWidth(table)
 title <- textGrob("model checking", y=unit(0.5,"npc") + 1*h, 
                   vjust=0, gp=gpar(fontsize=15))
 gt <- gTree(children=gList(table, title))
-jpeg('Image/mcheck1.jpg')
 grid.draw(gt)
-dev.off()
 ```
 
 
@@ -266,10 +257,12 @@ require(glmnet)
 y = as.matrix(data.3[,1])
 x = as.matrix(data.3[,-1])
 cvfit = cv.glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 1, standardize=TRUE,nfolds=10)
-jpeg('Image/lasso.jpeg',width=300,height = 250)
+par(mfrow=c(1,2))
+plot(cvfit$glmnet.fit)
+title("Trace plot",line = 2.2)
 plot(cvfit)
 title("CV for LASSO", line = 2.2)
-dev.off()
+par(mfrow=c(1,1))
 fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=1, standardize=TRUE)
 (fit$beta)
 ```
@@ -334,12 +327,10 @@ w <- grobWidth(table)
 title <- textGrob("model summary", y=unit(0.5,"npc") + 1*h, 
                   hjust=0,vjust=-0.1,gp=gpar(fontsize=15))
 gt <- gTree(children=gList(table, title))
-jpeg('Image/msummary.jpg')
 grid.draw(gt)
-dev.off()
-jpeg('Image/diag2.jpg',width=400,height=300)
-autoplot(m.final)
-dev.off()
+
+options(repr.plot.width=5, repr.plot.height=3.5)
+autoplot(m.final)+theme(text = element_text(size=6),plot.title = element_text(hjust = 0.5,size=8))
 res = m.final$residuals
 plot(data.3$HEIGHT,res)
 gvlma(m.final)
@@ -360,9 +351,7 @@ w <- grobWidth(table)
 title <- textGrob("model comparison", y=unit(0.5,"npc") + 1*h, 
                   hjust=0,vjust=-0.1,gp=gpar(fontsize=15))
 gt <- gTree(children=gList(result, title))
-jpeg('Image/mcomparison.jpg')
 grid.draw(gt)
-dev.off()
 ```
 
 
