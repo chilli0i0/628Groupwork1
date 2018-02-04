@@ -1,20 +1,20 @@
 # 628Groupwork1 Deadline: Feb 4
 
-Github Repository and Contents
-Your group must publish a Github repository that contains all of the data analysis. The repo should consist of three parts:
+Github Repository and Contents:
 
-  (i) a data folder containing the raw and (if relevant) cleaned data,
+* Code
+  * `HongzhiLiu`: The first version of analysis.
+  * `LixiaYi`: A copy of the first version on which we played.
+  * `group1` THE groupwork that we polished again and again. Lot's of credit to Jianmin Chen
+* Data
+  * Bodyfat.csv and description
+* Image
+  * Images that were later used in the presentation.
+* Jupyter
+  * ...
+* Not Important
+  * Not that important files irrelevant to the homework, stuffs like testing on Jupyter Notebook.
 
-  (ii) a code folder containing all the code for your analysis (e.g. cleaning the data, running the analysis, producing figures/tables, etc.),
+* README
 
-  (iii) an image folder containing any figures/images/tables produced in your analysis.
-
-Additionally, the repository must contain
-
-  (a) an executive summary folder/file containing a Jupyter Notebook file which must be readable by the Chrome web browser and
-
-  (b) a README Markdown file briefly summarizing the contents of the repository.
-
-Your repository must include all figures/tables, equations, code, and references. All figures, tables, code, and text must be legible. In particular, code must be clean enough for a data scientist to read.
-
-On the summary, the group must clearly indicate each member's contribution to the project, including each member's contribution to the presentation, code, and the image files. The final summary should not exceed more than 6 pdf pages.
+This Github Repository was maintained by two group members: Lixia Yi (Lixia Yi) and Jianmin Chen (jianminc & cjmsunny). The other two members Hongzhi Liu and Yanran Wang shared their files with other means, which we added to the collaborative work and updated them here.

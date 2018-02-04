@@ -30,7 +30,7 @@ unusual points checking rules:
 
 We try to delete (1),(2) abnormal points at the begining and other after fitting a multi-linear regression
 ```{r}
-data <- read.csv(file = "Data/BodyFat.csv")
+data <- read.csv(file = "../Data/BodyFat.csv")
 data <- data[, -c(1)]
 str(data)
 summary(data$BODYFAT)
@@ -70,7 +70,7 @@ data.1=data[-c(182,216,96,42),-c(2)]
 ###2.Visualization
 Most x has positive trend with y. And the multilinearity is heavy in this data set. Age here has a negetive trend with height, may because of age range in this data set.
 ```{r}
-png('Image/corrplot.png',width=310,height=400,res=150)
+png('../Image/corrplot.png',width=310,height=400,res=150)
 library('corrplot')
 library("RColorBrewer")
 M <- cor(data.1)
@@ -330,7 +330,7 @@ gt <- gTree(children=gList(table, title))
 grid.draw(gt)
 
 options(repr.plot.width=5, repr.plot.height=3.5)
-autoplot(m.final)+theme(text = element_text(size=6),plot.title = element_text(hjust = 0.5,size=8))
+autoplot(m.final, colour = "cadetblue3")+theme(text = element_text(size=6),plot.title = element_text(hjust = 0.5,size=8))
 res = m.final$residuals
 plot(data.3$HEIGHT,res)
 gvlma(m.final)
