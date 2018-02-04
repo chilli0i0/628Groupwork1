@@ -4,7 +4,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-All packages required
+All packages required:package ggfortify needs to be downloaded first manually and installed by hand.
 ```{r}
 library(gvlma)
 library(car)
@@ -70,7 +70,6 @@ data.1=data[-c(182,216,96,42),-c(2)]
 ###2.Visualization
 Most x has positive trend with y. And the multilinearity is heavy in this data set. Age here has a negetive trend with height, may because of age range in this data set.
 ```{r}
-png('../Image/corrplot.png',width=310,height=400,res=150)
 library('corrplot')
 library("RColorBrewer")
 M <- cor(data.1)
@@ -93,7 +92,6 @@ p.mat <- cor.mtest(data.1)
 corrplot(M, type="upper", order="hclust",col=brewer.pal(n=8, name="PuOr"),
          tl.col="black",sig.level = 0.01,p.mat=p.mat,insig = "blank",
          title="correlation plot",tl.cex=0.6,mar=c(0,0,1,0),cl.cex=0.6)
-dev.off()
 ```
 
 Scatter plots for bodyfat vs independent variables
@@ -161,9 +159,11 @@ cook1<-cook1+ggtitle("Cook's distance before delete observations")
 
 remove abnormal points and high influencial points from the data
 
-(1)remove influencial points: 39, 86, 221, 86, 192, 41, 250, 163 rule:Cook's Distance > 4/(n-p). Remove one point each time 
+(1)remove influencial points
+rule:Cook's Distance > 4/(n-p). Remove one point each time 
 
-(2)remove high leverage points:36, 54, 175, 106, 159, 206. rule: leverage > 3 * p / n
+(2)remove high leverage points.
+rule: leverage > 3 * p / n
 
 (3)remove outliers: No obvious outlier.
 
@@ -180,11 +180,11 @@ hat.plot <- function(fit){
 
 
 ```{r}
-data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 41, 163),-2]   #points differ
+data.2 = data[-c(182, 216, 96, 42, 39, 221, 86, 41, 163),-2]    #points differ
 model.raw2 <- lm(BODYFAT ~ ., data = data.2)
 outlierTest(model.raw2)
 data[224,]  #suspected outlier, but do not delete at 5%
-hat.plot(model.raw2)
+#hat.plot(model.raw2) used to see the index of certain points
 data.3 = data[-c(182, 216, 96, 42, 39, 31, 36, 41, 54, 86, 106, 159, 163, 175, 206, 216, 221),-2]
 ```
 
@@ -223,7 +223,7 @@ abline(h=0)
 
 ```{r}
 r1 = c('independence','homoscedasticity','linearity','normality')
-r2 = c('DurbinWatson test','Score test','gvlma test','Shapiro-Wilk test')
+r2 = c('Durbin-Watson Test','Score Test','Linear Function Test','Shapiro-Wilk Test')
 r3 = c(0.15,0.77,0.08,0.19)
 r = data.frame('Assumption'=r1,'test'=r2,'p-value'=r3)
 table <- tableGrob(r,rows=NULL)
@@ -239,20 +239,22 @@ grid.draw(gt)
 
 ###5.use other models
 
-#(1)use Mallows'Cp to select variables:AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST
+#(1)use Mallows'Cp to select variables:
+WEIGHT+ABDOMEN+BICEPS+WRIST
 ```{r}
 par(mfrow=c(1,1))
 X <- model.matrix(model.full)[,-1]
 Y <- data.3[,1]
 g <- leaps(X, Y,nbest=1)
 Cpplot(g) 
-model2 = lm(BODYFAT~AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST,data=data.3)
+model2 = lm(BODYFAT~WEIGHT+ABDOMEN+BICEPS+WRIST,data=data.3)
 ```
 
 #(2)use lasso to select
 AGE+HEIGHT+ABDOMEN+WRIST
 HEIGHT+ABODOMEN+WRIST
 ```{r}
+set.seed(15)
 require(glmnet)
 y = as.matrix(data.3[,1])
 x = as.matrix(data.3[,-1])
@@ -271,6 +273,7 @@ fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=1, 
 #(3)get test error by cross validation 
 #1.for full model
 ```{r}
+ser.seed(1)
 cv.err1 = 0
 model1 = glm(BODYFAT~.,data=data.3)
 for(i in 1:100){
@@ -281,17 +284,19 @@ cv.err1/100
 
 #1.for model select by MallowCp
 ```{r}
+set.seed(1)
 cv.err2 = 0
-model2 = glm(BODYFAT~AGE+WEIGHT+ABDOMEN+THIGH+WRIST,data=data.3)
+model2 = glm(BODYFAT~WEIGHT+ABDOMEN+BICEPS+WRIST,data=data.3)
 for(i in 1:100){
   cv.err2 = cv.err2+cv.glm(data.3,model2,K=10)$delta
 }
 cv.err2/100
-model2 = lm(BODYFAT~AGE+WEIGHT+ABDOMEN+THIGH+WRIST,data=data.3)
+model2 = lm(BODYFAT~WEIGHT+ABDOMEN+BICEPS+WRIST,data=data.3)
 ```
 
 #6.for model selected by lasso
 ```{r}
+set.seed(1)
 #AGE+HEIGHT+ABDOMEN+WRIST
 cv.err3 = 0
 model3 = glm(BODYFAT~AGE+HEIGHT+ABDOMEN+WRIST,data=data.3)
@@ -304,6 +309,7 @@ model3 = lm(BODYFAT~AGE+HEIGHT+ABDOMEN+WRIST,data=data.3)
 summary(model3)
 vif(model3)
 #HEIGHT+ABDOMEN+WRIST
+set.seed(1)
 cv.err4 = 0
 model4 = glm(BODYFAT~HEIGHT+ABDOMEN+WRIST,data=data.3)
 for(i in 1:100){
@@ -330,7 +336,7 @@ gt <- gTree(children=gList(table, title))
 grid.draw(gt)
 
 options(repr.plot.width=5, repr.plot.height=3.5)
-autoplot(m.final, colour = "cadetblue3")+theme(text = element_text(size=6),plot.title = element_text(hjust = 0.5,size=8))
+autoplot(m.final,colour='cadetblue3')+theme(text = element_text(size=6),plot.title = element_text(hjust = 0.5,size=8))
 res = m.final$residuals
 plot(data.3$HEIGHT,res)
 gvlma(m.final)
@@ -339,7 +345,7 @@ gvlma(m.final)
 
 ```{r}
 err = c(cv.err1[2],cv.err2[2],cv.err3[2],cv.err4[2])
-variables = c('Full model','AGE+WEIGHT+HEIGHT+ADIPOSITY+ABDOMEN+THIGH+WRIST',
+variables = c('Full model','WEIGHT+ABDOMEN+BICEPS+WRIST',
               'AGE+HEIGHT+ABDOMEN+WRIST','HEIGHT+ABDOMEN+WRIST')
 AdjR = c(summary(model.full)$adj.r.squared,summary(model2)$adj.r.squared,summary(model3)$adj.r.squared,summary(m.final)$adj.r.squared)
 method = c('Full model','Mallow Cp','Lasso','Lasso')
