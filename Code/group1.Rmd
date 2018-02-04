@@ -134,7 +134,7 @@ grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,ncol = 7, nrow = 2)
 ###3.Model fitting
 First, fit a multi-linear regression model with possible variables.From the VIF values we can see that the multicolinearity is heavy.
 
-Because the multilinearity will not affect model diagnostic for abnormal points, we tried to detect abnormal points with residuals plot first and then dealt with multicolinearity problem.
+Because the multilinearity will not affect model diagnostic for abnormal points, we tried to detect abnormal points with residuals plot first and then dealt with multicolinearity problem
 ```{r}
 model.raw <- lm(BODYFAT ~ ., data = data.1)
 summary(model.raw)
