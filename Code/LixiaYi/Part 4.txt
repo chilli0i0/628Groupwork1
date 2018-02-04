@@ -1,0 +1,13 @@
+## Conclusion
+
+The final model is :
+$$Bodyfat = 10.1006 - 0.4428Height + 0.7198Abdomen - 1.4557Wrist$$
+Simplifying it:
+$$Bodyfat = 10 - 0.5Height + 0.7Abdomen - 1.5Wrist$$
+
+Interpretation of the model: 
+In our project, it is good to assume that the body consists of two distinctive compartments: The body fat, the part we are concerning and the fat-free mass (FFM), which includes all the rest of the body apart from fat [ref]. It is intuitive to think that the circumference of our abdomen (belly) is a good parameter for measuring the body fat, while the circumference of our wrist, a part with minimum fat, is a good indicator for the FFM part of our body. Furthermore, as we've discussed previously, there exists multicollinearity between the variables given, hence the variable `Height` serves as a correction term instead of an unreasonable variable which contributes negatively to the body fat.
+
+One advantage of the model is its simplicity. To estimate our body fat, we only need to know three values: Our height, the circumference of our abdomen and the circumference of our wrist. Considering most of us already know our height and it is very easy to measure the the circumference of our abdomen and wrist, our model can provide a fairly good estimate of the body fat without much effort.
+
+The disadvantage of the model lies in its accuracy and adaptation. After we've simplified the model, we'll loose precision in the estimation of body fat. Moreover, components in our body change with age, gender and other factors. For example, growing children are different to adults, our bones become smaller when we get older and females have more body fat due to their nature. Since the data on which we fit our model was gathered only from males who are mostly in their middle-age, the model will only work well on the corresponding population. 
