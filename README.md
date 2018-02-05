@@ -11,7 +11,7 @@ Github Repository and Contents:
 * Image
   * Images that were later used in the presentation.
 * Jupyter
-  * Contains two ipynb files, a "TheFullNotebook.ipynb" and "Executive Summary.ipynb". The latter one is our executive summary file created by Jupyter Notebook. Printing it using Cmd+P will result in 5 pages.
+  * Contains two ipynb files, a "TheFullNotebook.ipynb" and "Executive Summary.ipynb". The latter one is our executive summary file created by Jupyter Notebook. Printing it using Cmd+P will result in 5 pages.
 * Reference
   * Two papers on which we referred to.
 * Not Important
