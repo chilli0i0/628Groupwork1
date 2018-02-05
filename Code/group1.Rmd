@@ -259,8 +259,9 @@ require(glmnet)
 y = as.matrix(data.3[,1])
 x = as.matrix(data.3[,-1])
 cvfit = cv.glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 1, standardize=TRUE,nfolds=10)
+cvfit1 = glmnet(x = x, y = y, family = "gaussian", nlambda = 100, alpha = 1, standardize=TRUE)
 par(mfrow=c(1,2))
-plot(cvfit$glmnet.fit)
+plot(cvfit1,xvar='lambda')
 title("Trace plot",line = 2.2)
 plot(cvfit)
 title("CV for LASSO", line = 2.2)
@@ -273,7 +274,7 @@ fit = glmnet(x = x, y = y, family = "gaussian",lambda=cvfit$lambda.1se,alpha=1, 
 #(3)get test error by cross validation 
 #1.for full model
 ```{r}
-ser.seed(1)
+set.seed(1)
 cv.err1 = 0
 model1 = glm(BODYFAT~.,data=data.3)
 for(i in 1:100){
